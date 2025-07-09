@@ -1,9 +1,9 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import Layout from './components/Layout'
-import Home from './pages/Home'
-import Counter from './pages/Counter'
-import Posts from './pages/Posts'
-import './App.css'
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Layout from "./components/Layout";
+import Home from "./pages/Home";
+import Counter from "./pages/Counter";
+import Posts from "./pages/Posts";
+// import './App.css'
 
 function App() {
   return (
@@ -16,7 +16,7 @@ function App() {
         </Routes>
       </Layout>
     </BrowserRouter>
-  )
+  );
 }
 
-export default App
+export default App;

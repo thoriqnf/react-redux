@@ -185,7 +185,7 @@ const NewPostForm = () => {
 const PostComments = ({ postId }) => {
   const [showComments, setShowComments] = useState(false)
   
-  const comments = usePostsStore((state) => state.comments[postId] || [])
+  const comments = usePostsStore((state) => state.getCommentsForPost(postId))
   const loading = usePostsStore((state) => state.loading.comments)
   const error = usePostsStore((state) => state.errors.comments)
   const fetchComments = usePostsStore((state) => state.fetchComments)

@@ -201,11 +201,25 @@ const usePostsStore = create(
           state.lastFetch = { posts: null, users: null }
         }),
         
-        // Computed values
+        // Computed values with memoization
+        _filteredPostsCache: null,
+        _filteredPostsCacheKey: null,
         getFilteredPosts: () => {
           const { posts, selectedUserId } = get()
-          if (!selectedUserId) return posts
-          return posts.filter(post => post.userId === selectedUserId)
+          const cacheKey = `${posts.length}-${selectedUserId}`
+          
+          if (get()._filteredPostsCacheKey === cacheKey) {
+            return get()._filteredPostsCache
+          }
+          
+          const filtered = selectedUserId ? posts.filter(post => post.userId === selectedUserId) : posts
+          
+          set((state) => {
+            state._filteredPostsCache = filtered
+            state._filteredPostsCacheKey = cacheKey
+          })
+          
+          return filtered
         },
         
         getPostById: (id) => {
@@ -216,11 +230,37 @@ const usePostsStore = create(
           return get().users.find(user => user.id === id)
         },
         
+        // Memoized selector for comments to prevent infinite loops
+        _commentsCache: {},
+        getCommentsForPost: (postId) => {
+          const comments = get().comments[postId]
+          
+          if (comments) {
+            return comments
+          }
+          
+          // Return cached empty array to maintain stable reference
+          if (!get()._commentsCache[postId]) {
+            set((state) => {
+              state._commentsCache[postId] = []
+            })
+          }
+          
+          return get()._commentsCache[postId]
+        },
+        
+        _statsCache: null,
+        _statsCacheKey: null,
         getPostsStats: () => {
           const posts = get().posts
           const users = get().users
+          const cacheKey = `${posts.length}-${users.length}`
           
-          return {
+          if (get()._statsCacheKey === cacheKey) {
+            return get()._statsCache
+          }
+          
+          const stats = {
             totalPosts: posts.length,
             totalUsers: users.length,
             averagePostsPerUser: users.length > 0 ? (posts.length / users.length).toFixed(1) : 0,
@@ -230,6 +270,13 @@ const usePostsStore = create(
               return userPosts > maxPosts ? user : max
             }, users[0] || {})
           }
+          
+          set((state) => {
+            state._statsCache = stats
+            state._statsCacheKey = cacheKey
+          })
+          
+          return stats
         },
         
         // Retry mechanism
